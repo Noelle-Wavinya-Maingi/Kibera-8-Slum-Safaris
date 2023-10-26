@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()  
 from myapp import app, db, routes
 from myapp.models import User, Organization
 
