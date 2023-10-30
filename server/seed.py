@@ -14,8 +14,8 @@ def seed_database():
         user1 = User(
             username="sample_user",
             email="user@example.com",
-            password="sample_password",  # You can replace this with the actual password
-            role="Admin",  # Replace with the actual role
+            password="sample_password",  
+            role="Admin",  
         )
 
         # Create a sample organization
