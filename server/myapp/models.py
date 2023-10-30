@@ -285,4 +285,3 @@ class Tours(db.Model):
 
     def __repr__(self):
         return f"Tours(id={self.id}, name={self.name}, price={self.price}, date={self.date})"
-
