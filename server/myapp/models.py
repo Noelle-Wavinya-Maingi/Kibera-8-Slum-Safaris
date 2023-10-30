@@ -272,8 +272,8 @@ class Story(db.Model):
         return (
             f"Story(id={self.id}, title={self.title}, published_at={self.published_at})"
         )
-
-
+    
+    
 # Define the Inventory model
 class Inventory(db.Model):
     __tablename__ = "inventories"
