@@ -6,6 +6,7 @@ from flask import Flask
 import os
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
+from datetime import timedelta
 
 app = Flask(__name__)
 api = Api(app, version="1.0", title="Kibera 8 Slum Safaris API")
