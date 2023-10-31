@@ -30,7 +30,11 @@ class User(db.Model):
 
     # Relationships with other tables
     donations = relationship("Donation", back_populates="donor")
-    tours = relationship("Tours", back_populates="user")
+    tours = relationship(
+        "Tours",
+        secondary="user_tours",
+        back_populates="user",
+    )
 
     # Constructor to initialize a new user
     def __init__(self, username, email, password, role):
@@ -254,18 +258,21 @@ class Story(db.Model):
     id = Column(Integer, primary_key=True)
     title = Column(String(100), nullable=False)
     content = Column(Text, nullable=False)
-    created_at = Column(DateTime)
+    created_at = Column(DateTime,default=datetime.utcnow)
+    image = Column(String(255), nullable=False)
+
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
 
     # Relationship with the Organization table
     organization = relationship("Organization", back_populates="stories")
 
     # Constructor to initialize a new story
-    def __init__(self, title, content, published_at, organization_id):
+    def __init__(self, title, content, created_at, organization_id, image):
         self.title = title
         self.content = content
-        self.published_at = published_at
+        self.created_at = created_at
         self.organization_id = organization_id
+        self.image = image
 
     # String representation of the Story object
     def __repr__(self):
@@ -312,19 +319,27 @@ class Tours(db.Model):
     name = Column(String(255), nullable=False)
     image = Column(String(255), nullable=False)
     price = Column(Float, nullable=False)
-    date = Column(DateTime, nullable=False)
-
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    user = relationship("User", back_populates="tours")
+    
+    user = relationship(
+        "User",
+        secondary="user_tours",
+        back_populates="tours",
+    )
 
     # Constructor to initialize a new tour
-    def __init__(self, name, image, price, date, user_id):
+    def __init__(self, name, image, price):
         self.name = name
         self.price = price
-        self.user_id = user_id
         self.image = image
-        self.date = date
 
     # String representation of the Tours object
     def __repr__(self):
-        return f"Tours(id={self.id}, name={self.name}, price={self.price}, date={self.date})"
+        return f"Tours(id={self.id}, name={self.name}, price={self.price})"
+
+# Define the association table for users and tours
+user_tours = db.Table(
+    "user_tours",
+    Column("user_id", Integer, ForeignKey("users.id")),
+    Column("tours_id", Integer, ForeignKey("tours.id")),
+    Column("tour_date", DateTime, nullable = False)
+)
