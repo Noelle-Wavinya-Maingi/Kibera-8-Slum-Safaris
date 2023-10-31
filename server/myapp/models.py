@@ -277,7 +277,7 @@ class Story(db.Model):
     # String representation of the Story object
     def __repr__(self):
         return (
-            f"Story(id={self.id}, title={self.title}, published_at={self.published_at})"
+            f"Story(id={self.id}, title={self.title})"
         )
     
     

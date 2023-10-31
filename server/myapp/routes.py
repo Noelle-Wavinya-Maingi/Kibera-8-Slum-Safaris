@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Resource, fields
 from . import app, db, mail, api, bcrypt
 from myapp.models import User, Organization
+from myapp.schema import user_schema, users_schema, organization_schema, organizations_schema
 from flask_mail import Message
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
@@ -37,23 +38,21 @@ organization_request = api.model(
 class UserRegistration(Resource):
     @api.expect(user_registration,  validate = True)
     def post(self):
+        """Submit user registration details"""
         data = request.get_json()
-        username = data.get("username")
-        email = data.get("email")
-        password = data.get("password")
-        role = data.get("role")
+        user = user_schema.load(data)
 
-        if not username or not email or not password or not role:
+        if not user.get("username") or not user.get("email") or not user.get("password") or not user.get("role"):
             return {"message": "All fields are required"}, 400
 
-        existing_email = User.query.filter_by(email=email).first()
-        existing_username = User.query.filter_by(username=username).first()
+        existing_email = User.query.filter_by(email=user.get("email")).first()
+        existing_username = User.query.filter_by(username=user.get("username")).first()
         if existing_email:
             return {"message": "Email already registered"}, 409
         if existing_username:
             return {"message": "Username already registered"}, 409
         
-        new_user = User(username=username, email=email, password=password, role=role)
+        new_user = User(**user)
 
         db.session.add(new_user)
         db.session.commit()
@@ -64,6 +63,7 @@ class UserRegistration(Resource):
 class UserLogin(Resource):
     @api.expect(user_login, validate=True)
     def post(self):
+        """User login"""
         data = request.get_json()
         user = User.query.filter_by(email=data['email']).first()
 
@@ -79,24 +79,18 @@ class UserLogin(Resource):
         else:
             return {"message": "Invalid credentials"}, 401
 
-    @jwt_required
-    def get(self):
-        current_user_id = get_jwt_identity()
-        user = User.query.get(current_user_id)
-        return {
-            "user_id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "role": user.role
-        }
-
 # Define the OrganizationRequest resource
 @api.route("/organization_requests")
 class OrganizationRequestResource(Resource):
     @api.marshal_with(organization_request)
     def get(self):
         """Get a list of organization requests."""
+    
         requests = Organization.query.filter_by(status=False).all()
+    
+        if not requests:
+            api.abort(404, "No pending organization requests found!")
+       
         return requests
 
     @api.expect(organization_request, validate=True)

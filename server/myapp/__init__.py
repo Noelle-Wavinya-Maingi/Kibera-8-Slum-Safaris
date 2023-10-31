@@ -7,9 +7,11 @@ import os
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
+from flask_marshmallow import Marshmallow
 
 app = Flask(__name__)
 api = Api(app, version="1.0", title="Kibera 8 Slum Safaris API")
+ma = Marshmallow(app)
 app.config["SECRET_KEY"] = '33f334a749dd2e8216f245b0bb263aea'
 app.config['JWT_SECRET_KEY'] = 'b99ce1e67619ed6f9dd29211ec08e559'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tours.db'
