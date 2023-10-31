@@ -1,5 +1,6 @@
 from . import ma
 from myapp.models import User, Organization, Beneficiary, Story, Tours, Donation, Inventory, beneficiaries_organizations, user_tours
+from marshmallow import fields
 
 # Define a Marshmalllow schema for the User model
 class UserSchema(ma.SQLAlchemySchema):
@@ -116,30 +117,3 @@ class InventorySchema(ma.SQLAlchemySchema):
 # Create an instance of the UserSchema for single and multiple inventory objects 
 inventory_schema = InventorySchema()
 inventories_schema = InventorySchema(many=True)
-
-# Define a Marshmallow schema for the beneficiaries_organizations model
-class BeneficiariesOrganizationsSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = beneficiaries_organizations
-
-    # Define fields to be included in the schema
-    beneficiary_id = ma.auto_field()
-    organization_id = ma.auto_field()
-
-# Create an instance of the BeneficiariesOrganizationsSchema for single and multiple objects
-beneficiaries_organizations_schema = BeneficiariesOrganizationsSchema()
-beneficiaries_organizations_schema = BeneficiariesOrganizationsSchema(many=True)
-
-# Define a Marshmallow schema for the user_tours model
-class UserToursSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = user_tours
-
-    # Define fields to be included in the schema
-    user_id = ma.auto_field()
-    tour_id = ma.auto_field()
-    tour_date = ma.auto_field()
-
-# Create an instance of the UserToursSchema for single and multiple objects
-user_tours_schema = UserToursSchema()
-user_tours_schema = UserToursSchema(many=True)
