@@ -1,10 +1,15 @@
 from flask import request
 from flask_restx import Resource, fields
 from . import app, db, mail, api, bcrypt
-from myapp.models import User, Organization
+from myapp.models import User, Organization, Beneficiary, Donation
 from flask_mail import Message
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+
+
+app = Flask(__name)
 
 # Define Data Transfer Object for organization request
 user_login = api.model("UserLogin", {
@@ -160,15 +165,7 @@ class OrganizationRequestDetailResource(Resource):
 
         return {"message": f"Organization request {id} has been {status}"}
 
-        
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail
-from .models import User, Organization, Beneficiary, Donation
-
-app = Flask(__name)
-
-# Configure your Flask app, SQLAlchemy, and Flask-Mail here
+ # Beneficiaries, donor and admin routes
 
 # Routes for Beneficiaries
 @app.route('/beneficiaries')
@@ -217,7 +214,6 @@ def reject_organization(id):
             return redirect(url_for('admin_dashboard'))
     return render_template('admin/reject_organization.html', organization=organization)
 
-# Other admin routes can be added as needed
 
 if __name__ == '__main__':
     app.run()
