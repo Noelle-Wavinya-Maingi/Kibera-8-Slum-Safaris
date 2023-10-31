@@ -51,6 +51,7 @@
 
 # if __name__ == '__main__':
 #     app.run()
+
 from flask import request
 from flask_restx import Resource, fields
 from . import db, api, bcrypt, mail
