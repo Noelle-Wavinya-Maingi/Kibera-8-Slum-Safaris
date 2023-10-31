@@ -1,15 +1,10 @@
 from flask import request
 from flask_restx import Resource, fields
 from . import app, db, mail, api, bcrypt
-from myapp.models import User, Organization, Beneficiary, Donation
+from myapp.models import User, Organization
 from flask_mail import Message
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-
-
-app = Flask(__name)
 
 # Define Data Transfer Object for organization request
 user_login = api.model("UserLogin", {
@@ -164,56 +159,3 @@ class OrganizationRequestDetailResource(Resource):
             organization.reject_request(reason)
 
         return {"message": f"Organization request {id} has been {status}"}
-
- # Beneficiaries, donor and admin routes
-
-# Routes for Beneficiaries
-@app.route('/beneficiaries')
-def list_beneficiaries():
-    beneficiaries = Beneficiary.query.all()
-    return render_template('beneficiaries.html', beneficiaries=beneficiaries)
-
-@app.route('/beneficiary/<int:id>')
-def view_beneficiary(id):
-    beneficiary = Beneficiary.query.get(id)
-    return render_template('beneficiary.html', beneficiary=beneficiary)
-
-# Routes for Donors
-@app.route('/donors')
-def list_donors():
-    donors = User.query.filter_by(role='donor').all()
-    return render_template('donors.html', donors=donors)
-
-@app.route('/donor/<int:id>')
-def view_donor(id):
-    donor = User.query.get(id)
-    return render_template('donor.html', donor=donor)
-
-# Routes for Admin
-@app.route('/admin/dashboard')
-def admin_dashboard():
-    # Add admin authentication logic here
-    return render_template('admin/dashboard.html')
-
-@app.route('/admin/approve_organization/<int:id>')
-def approve_organization(id):
-    organization = Organization.query.get(id)
-    if organization.approve_request():
-        flash('Organization approved and notified.')
-    else:
-        flash('Organization is already approved.')
-    return redirect(url_for('admin_dashboard'))
-
-@app.route('/admin/reject_organization/<int:id>', methods=['GET', 'POST'])
-def reject_organization(id):
-    organization = Organization.query.get(id)
-    if request.method == 'POST':
-        reason = request.form['reason']
-        if organization.reject_request(reason):
-            flash('Organization rejected and notified.')
-            return redirect(url_for('admin_dashboard'))
-    return render_template('admin/reject_organization.html', organization=organization)
-
-
-if __name__ == '__main__':
-    app.run()
