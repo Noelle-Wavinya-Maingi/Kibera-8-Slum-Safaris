@@ -92,6 +92,14 @@ class Organization(db.Model):
             raise ValueError("Email is required")
         return email
 
+    # Method to generate a password hash
+    def generate_password_hash(self, password):
+        return bcrypt.generate_password_hash(password).decode("utf-8")
+
+    # Method to check if the provided password matches the stored hash
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)
+
     # Method to approve the organization's registration
     def approve_request(self):
         if not self.status:
@@ -267,10 +275,9 @@ class Story(db.Model):
     organization = relationship("Organization", back_populates="stories")
 
     # Constructor to initialize a new story
-    def __init__(self, title, content, created_at, organization_id, image):
+    def __init__(self, title, content, organization_id, image):
         self.title = title
         self.content = content
-        self.created_at = created_at
         self.organization_id = organization_id
         self.image = image
 
