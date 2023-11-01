@@ -271,7 +271,7 @@ class Story(db.Model):
     def __init__(self, title, content, created_at, organization_id, image):
         self.title = title
         self.content = content
-        self.created_at = created_at
+        # self.created_at = created_at
         self.organization_id = organization_id
         self.image = image
 
