@@ -33,6 +33,11 @@ organization_request = api.model(
     },
 )
 
+organization_login = api.model("OrganizationLogin", {
+    "email": fields.String(required=True),
+    "password": fields.String(required=True),
+})
+
 
 @api.route("/user/register")
 class UserRegistration(Resource):
@@ -153,3 +158,30 @@ class OrganizationRequestDetailResource(Resource):
             organization.reject_request(reason)
 
         return {"message": f"Organization request {id} has been {status}"}
+@api.route("/organization/login")
+class OrganizationLogin(Resource):
+    @api.expect(organization_login, validate=True)
+    @api.marshal_with(organization_login)
+    def post(self):
+        """Organization login"""
+        data = request.get_json()
+        organization = Organization.query.filter_by(email=data['email']).first()
+
+        if organization:
+            if bcrypt.check_password_hash(organization.password, data['password']):
+                if organization.status:
+                    access_token = create_access_token(identity=organization.id)
+                    return {
+                        "access_token": access_token,
+                        "organization_id": organization.id,
+                        "name": organization.name,
+                        "email": organization.email,
+                        "status": organization.status,
+                    }, 200
+                else:
+                    return {"message": "Organization is pending approval. Please wait for approval."}, 403
+            else:
+                return {"message": "Invalid credentials"}, 401
+        else:
+            return {"message": "Organization not found"}, 404
+        
