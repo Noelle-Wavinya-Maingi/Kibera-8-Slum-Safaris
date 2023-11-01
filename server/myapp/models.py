@@ -169,6 +169,7 @@ class Donation(db.Model):
     recurrence_interval = Column(String(20))
     next_recurrence_date = Column(Date)
     created_at = Column(DateTime, default=datetime.utcnow)
+    
 
     # Relationships with other tables
     donor = relationship("User", back_populates="donations")
