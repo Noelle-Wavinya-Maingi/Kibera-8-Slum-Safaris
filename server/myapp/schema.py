@@ -81,7 +81,7 @@ class ToursSchema(ma.SQLAlchemySchema):
     price = ma.auto_field()
 
 # Create an instance of the UserSchema for single and multiple tours objects 
-tours_schema = ToursSchema()
+tour_schema = ToursSchema()
 tours_schema = ToursSchema(many=True)
 
 # Define a Marshmalllow schema for the Donation model
