@@ -13,7 +13,7 @@ inventory_model = api.model(
         "id": fields.Integer(readonly=True),
         "name": fields.String,
         "quantity": fields.Integer,
-        "beneficiary_id": fields.Integer,
+        "user_id": fields.Integer,
     },
 )
 
@@ -27,7 +27,7 @@ class InventoryResource(Resource):
             if current_user_id is None:
                 return {"message": "Invalid token"}, 401
 
-            inventory_items = Inventory.query.filter_by(beneficiary_id=current_user_id).all()
+            inventory_items = Inventory.query.filter_by(user_id=current_user_id).all()
             inventory_list = inventories_schema.dump(inventory_items)
             res = inventory_list, 200
             return jsonify(res)
@@ -41,13 +41,14 @@ class InventoryResource(Resource):
         current_user_id = get_jwt_identity()
         try:
             new_inventory_item = api.payload  # Get the data for the new inventory item from the request
+            new_inventory_item['user_id'] = current_user_id
             inventory_item = Inventory(**new_inventory_item)
             db.session.add(inventory_item)
             db.session.commit()
-            return jsonify({"message": "Inventory item created successfully"}), 201
+            return {"message": "Inventory item created successfully"}, 201
         except Exception as e:
             error_message = "An error occurred while creating the inventory item"
-            return make_response(jsonify({"message": error_message}), 500)
+            return {"message": error_message}, 500
 
         
 
@@ -67,30 +68,29 @@ class InventoryItemResource(Resource):
             print("Error:", e)
             return {"message": "An error occurred"}, 500
     
-    @jwt_required
+    @jwt_required()
     def delete(self, inventory_id):
-        current_user_id = get_jwt_identity()
         try:
+            current_user_id = get_jwt_identity()
             inventory_item = Inventory.query.get(inventory_id)
             if inventory_item:
                 db.session.delete(inventory_item)
                 db.session.commit()
-                return make_response(jsonify({"message": "Inventory item deleted successfully"}), 204)
+                return {"message": "Inventory item deleted successfully"}, 204
             else:
-                return make_response(jsonify({"message": "Inventory item not found"}), 404)
+                return {"message": "Inventory item not found"}, 404
         except Exception as e:
             print("Error:", e)
             db.session.rollback()
-            return make_response(jsonify({"message": "An error occurred while deleting the inventory item"}), 500)
+            return {"message": "An error occurred while deleting the inventory item"}, 500
     
     @jwt_required()
-    def patch(self, inventory_id): 
+    def patch(self, inventory_id):
         current_user_id = get_jwt_identity()
         try:
             inventory_item = Inventory.query.get(inventory_id)
             if not inventory_item:
-               return make_response(jsonify({"message": "Inventory item not found"}), 404)
-
+                return {"message": "Inventory item not found"}, 404
 
             updated_data = api.payload  # Get the data for updating the inventory item from the request
 
@@ -99,8 +99,8 @@ class InventoryItemResource(Resource):
                 setattr(inventory_item, key, value)
 
             db.session.commit()
-            return make_response(jsonify({"message": "Inventory item updated successfully"}), 200)
+            return {"message": "Inventory item updated successfully"}, 200
         except Exception as e:
             print("Error:", e)
             db.session.rollback()
-            return make_response(jsonify({"message": "An error occurred while updating the inventory item"}), 500)
+            return {"message": "An error occurred while updating the inventory item"}, 500
