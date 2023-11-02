@@ -44,6 +44,7 @@ password_reset = api.model('PasswordReset', {
         "password": fields.String(required=True)
     })
 
+# Define a route for user registration
 @api.route("/user/register")
 class UserRegistration(Resource):
     @api.expect(user_registration,  validate = True)
@@ -69,6 +70,7 @@ class UserRegistration(Resource):
 
         return {"message": "User registered successfully!"}, 201
 
+# Define a route for user login
 @api.route("/user/login")
 class UserLogin(Resource):
     @api.expect(user_login, validate=True)
@@ -128,6 +130,7 @@ class OrganizationRequestResource(Resource):
         return organization, 201
 
 
+# Define a route for viewing and managing a specific organization request
 @api.route("/organization_requests/<int:id>")
 class OrganizationRequestDetailResource(Resource):
     @api.marshal_with(organization_request)
@@ -163,6 +166,8 @@ class OrganizationRequestDetailResource(Resource):
             organization.reject_request(reason)
 
         return {"message": f"Organization request {id} has been {status}"}
+
+# Define a route for organization login
 @api.route("/organization/login")
 class OrganizationLogin(Resource):
     @api.expect(organization_login, validate=True)
