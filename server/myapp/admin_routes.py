@@ -22,7 +22,7 @@ donation_request = api.model(
     "DonationRequest",
     {
         "amount": fields.Float(required=True),
-        "donor_id": fields.Integer(required=True),
+        "user_id": fields.Integer(required=True),
         "organization_id": fields.Integer(required=True),
         "is_anonymous": fields.Boolean(default=False),
         "recurrence_interval": fields.String,
