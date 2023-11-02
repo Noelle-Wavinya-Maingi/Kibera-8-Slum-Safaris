@@ -104,7 +104,7 @@ class OrganizationRequestResource(Resource):
         return requests
 
     @api.expect(organization_request, validate=True)
-    # @api.marshal_with(organization_request)
+    @api.marshal_with(organization_request)
     def post(self):
         """Submit an organization request."""
         data = request.get_json()
@@ -166,12 +166,10 @@ class OrganizationRequestDetailResource(Resource):
 @api.route("/organization/login")
 class OrganizationLogin(Resource):
     @api.expect(organization_login, validate=True)
-    # @api.marshal_with(organization_login)
     def post(self):
         """Organization login"""
         data = request.get_json()
         organization = Organization.query.filter_by(email=data['email']).first()
-        
         if organization:
             if bcrypt.check_password_hash(organization.password, data['password']):
                 if organization.status:
@@ -183,12 +181,9 @@ class OrganizationLogin(Resource):
                         "email": organization.email,
                         "status": organization.status,
                     }, 200
-                
                 else:
                     return {"message": "Organization is pending approval. Please wait for approval."}, 403
             else:
                 return {"message": "Invalid credentials"}, 401
         else:
             return {"message": "Organization not found"}, 404
-        
-
