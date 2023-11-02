@@ -67,10 +67,10 @@ class InventoryItemResource(Resource):
             print("Error:", e)
             return {"message": "An error occurred"}, 500
     
-    @jwt_required
+    @jwt_required()
     def delete(self, inventory_id):
-        current_user_id = get_jwt_identity()
         try:
+            current_user_id = get_jwt_identity()
             inventory_item = Inventory.query.get(inventory_id)
             if inventory_item:
                 db.session.delete(inventory_item)
@@ -84,13 +84,12 @@ class InventoryItemResource(Resource):
             return make_response(jsonify({"message": "An error occurred while deleting the inventory item"}), 500)
     
     @jwt_required()
-    def patch(self, inventory_id): 
+    def patch(self, inventory_id):
         current_user_id = get_jwt_identity()
         try:
             inventory_item = Inventory.query.get(inventory_id)
             if not inventory_item:
-               return make_response(jsonify({"message": "Inventory item not found"}), 404)
-
+                return make_response(jsonify({"message": "Inventory item not found"}), 404)
 
             updated_data = api.payload  # Get the data for updating the inventory item from the request
 
