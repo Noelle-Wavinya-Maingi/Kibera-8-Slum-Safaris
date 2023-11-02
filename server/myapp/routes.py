@@ -1,10 +1,11 @@
-from flask import request
+from flask import  request
 from flask_restx import Resource, fields
 from . import app, db, mail, api, bcrypt
 from myapp.models import User, Organization
 from myapp.schema import user_schema, users_schema, organization_schema, organizations_schema
 from flask_mail import Message
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, create_refresh_token
+
 
 
 # Define Data Transfer Object for organization request
@@ -38,6 +39,9 @@ organization_login = api.model("OrganizationLogin", {
     "password": fields.String(required=True),
 })
 
+password_reset = api.model('PasswordReset', {
+        "password": fields.String(required=True)
+    })
 
 @api.route("/user/register")
 class UserRegistration(Resource):
@@ -99,7 +103,7 @@ class OrganizationRequestResource(Resource):
         return requests
 
     @api.expect(organization_request, validate=True)
-    @api.marshal_with(organization_request)
+    # @api.marshal_with(organization_request)
     def post(self):
         """Submit an organization request."""
         data = request.get_json()
@@ -161,12 +165,12 @@ class OrganizationRequestDetailResource(Resource):
 @api.route("/organization/login")
 class OrganizationLogin(Resource):
     @api.expect(organization_login, validate=True)
-    @api.marshal_with(organization_login)
+    # @api.marshal_with(organization_login)
     def post(self):
         """Organization login"""
         data = request.get_json()
         organization = Organization.query.filter_by(email=data['email']).first()
-
+        
         if organization:
             if bcrypt.check_password_hash(organization.password, data['password']):
                 if organization.status:
@@ -178,6 +182,7 @@ class OrganizationLogin(Resource):
                         "email": organization.email,
                         "status": organization.status,
                     }, 200
+                
                 else:
                     return {"message": "Organization is pending approval. Please wait for approval."}, 403
             else:
@@ -185,3 +190,4 @@ class OrganizationLogin(Resource):
         else:
             return {"message": "Organization not found"}, 404
         
+

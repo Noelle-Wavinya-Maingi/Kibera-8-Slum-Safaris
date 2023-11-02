@@ -70,7 +70,7 @@ def seed_database():
         story1 = Story(
             title="Sample Story",
             content="This is a sample story content.",
-            created_at=datetime.utcnow(),
+            # created_at=datetime.utcnow(),
             organization_id=organization1.id,
             image="https://www.google.com/imgres?imgurl=https%3A%2F%2Fmedia.tacdn.com%2Fmedia%2Fattractions-splice-spp-674x446%2F07%2Fc1%2F97%2F0e.jpg&tbnid=gP8VHqXNdoNHrM&vet=12ahUKEwiigreb5p2CAxUdlCcCHacXAjwQMygBegQIARA6..i&imgrefurl=https%3A%2F%2Fwww.viator.com%2Ftours%2FNairobi%2FKibera-Slum-Guided-Day-Tour-from-Nairobi%2Fd5280-21143P25&docid=P2vEY0r2DFC8rM&w=669&h=446&q=kibera%20tourist%20spot&ved=2ahUKEwiigreb5p2CAxUdlCcCHacXAjwQMygBegQIARA6",
         )
@@ -83,7 +83,7 @@ def seed_database():
         inventory1 = Inventory(
             name="Sample Item",
             quantity=10,
-            beneficiary_id=beneficiary1.id,
+            user_id=user1.id,
         )
 
         db.session.add(inventory1)
