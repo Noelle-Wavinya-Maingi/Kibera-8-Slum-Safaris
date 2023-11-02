@@ -63,7 +63,7 @@ class StorySchema(ma.SQLAlchemySchema):
     content = ma.auto_field()
     created_at = ma.auto_field()
     image = ma.auto_field()
-    organization_id = ma.auto_field()
+    user_id = ma.auto_field()
 
 # Create an instance of the UserSchema for single and multiple story objects 
 story_schema = StorySchema()
