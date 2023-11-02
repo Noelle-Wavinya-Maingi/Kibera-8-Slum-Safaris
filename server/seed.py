@@ -83,7 +83,7 @@ def seed_database():
         inventory1 = Inventory(
             name="Sample Item",
             quantity=10,
-            beneficiary_id=beneficiary1.id,
+            user_id=user1.id,
         )
 
         db.session.add(inventory1)

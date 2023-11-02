@@ -112,7 +112,7 @@ class InventorySchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     name = ma.auto_field()
     quantity = ma.auto_field()
-    beneficiary_id = ma.auto_field()
+    user_id = ma.auto_field()
 
 # Create an instance of the UserSchema for single and multiple inventory objects 
 inventory_schema = InventorySchema()

@@ -30,6 +30,7 @@ class User(db.Model):
 
     # Relationships with other tables
     donations = relationship("Donation", back_populates="donor")
+    inventory = relationship("Inventory", back_populates="donors")
     tours = relationship(
         "Tours",
         secondary="user_tours",
@@ -238,7 +239,7 @@ class Beneficiary(db.Model):
         secondary="beneficiaries_organizations",
         back_populates="beneficiaries",
     )
-    inventory = relationship("Inventory", back_populates="beneficiary")
+    
 
     # Constructor to initialize a new beneficiary
     def __init__(self, name, age=None, gender=None, address=None):
@@ -275,6 +276,7 @@ class Story(db.Model):
     # Relationship with the Organization table
     organization = relationship("Organization", back_populates="stories")
 
+
     # Constructor to initialize a new story
     def __init__(self, title, content, organization_id, image):
         self.title = title
@@ -296,10 +298,10 @@ class Inventory(db.Model):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     quantity = Column(Integer, nullable=False)
-    beneficiary_id = Column(Integer, ForeignKey("beneficiaries.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    # Relationship with the Beneficiary table
-    beneficiary = relationship("Beneficiary", back_populates="inventory")
+    # Relationship with the Users table
+    donors = relationship("User", back_populates="inventory")
 
     # Validation method for the name field
     @validates("name")
@@ -309,14 +311,14 @@ class Inventory(db.Model):
         return name
 
     # Constructor to initialize a new inventory item
-    def __init__(self, name, quantity, beneficiary_id):
+    def __init__(self, name, quantity, user_id):
         self.name = name
         self.quantity = quantity
-        self.beneficiary_id = beneficiary_id
+        self.user_id = user_id
 
     # String representation of the Inventory object
     def __repr__(self):
-        return f"Inventory(id={self.id}, name={self.name}, quantity={self.quantity}, beneficiary_id={self.beneficiary_id})"
+        return f"Inventory(id={self.id}, name={self.name}, quantity={self.quantity}, user_id={self.user_id})"
 
 
 # Define the Tours model
