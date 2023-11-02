@@ -34,6 +34,7 @@ organization_request = api.model(
     },
 )
 
+# Define DTO for organization login
 organization_login = api.model("OrganizationLogin", {
     "email": fields.String(required=True),
     "password": fields.String(required=True),
