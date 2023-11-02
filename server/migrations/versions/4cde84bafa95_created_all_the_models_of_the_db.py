@@ -1,8 +1,8 @@
-"""created all models."
+"""Created all the models of the db
 
-Revision ID: a750dcf927c6
+Revision ID: 4cde84bafa95
 Revises: 
-Create Date: 2023-10-31 10:08:08.598287
+Create Date: 2023-11-02 10:43:56.955183
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'a750dcf927c6'
+revision = '4cde84bafa95'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -77,8 +77,8 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
-    sa.Column('beneficiary_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['beneficiary_id'], ['beneficiaries.id'], ),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('stories',
