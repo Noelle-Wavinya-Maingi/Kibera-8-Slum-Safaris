@@ -14,7 +14,7 @@ user_login = api.model("UserLogin", {
         "password": fields.String(required=True),
     })
 
-
+# DEfine DTO for user registration
 user_registration = api.model("UserRegistration", {
         "email": fields.String(required=True),
         "password": fields.String(required=True),
