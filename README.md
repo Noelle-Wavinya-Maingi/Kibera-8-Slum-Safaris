@@ -91,5 +91,10 @@ If you'd like to contribute to this project, please follow these steps:
 
 - [Kelvin Moti](https://github.com/motikev)
 
+### Acknowledgments
+
+- Special thanks to the developers and contributors who made this project possible.
+
+
 ### License
 This project is licensed under the MIT [License](LICENCE).
