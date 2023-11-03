@@ -1,5 +1,5 @@
 # KIBERA-8-SLUM-SAFARIS
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)]
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-2.1.1-blue.svg)](https://pypi.org/project/Flask/)
 [![Flask-RESTx](https://img.shields.io/badge/Flask--RESTx-0.5.1-blue.svg)](https://pypi.org/project/flask-restx/)
