@@ -38,8 +38,10 @@
 
 ## Technologies Used
 
-- Backend: POSTGRESQL, Python Flask
-- Authentication: JWT (JSON Web Tokens)
+- POSTGRESQL
+- Python Flask
+- JWT (JSON Web Tokens)
+- Flask-RESTx
 
 ## Installation
 
@@ -69,14 +71,25 @@ gunicorn app:app
 If you'd like to contribute to this project, please follow these steps:
 
 1. Fork the repository.
+
 2. Create a new branch for your feature or bug fix.
+
 3. Make your changes and test thoroughly.
+
 4. Create a pull request explaining the changes you've made.
 
 ### Authors : 
-[Noelle Maingi](https://github.com/Noelle-Wavinya-Maingi)
-[Ian Odhiambo](https://github.com/Noelle-Wavinya-Maingi)
-[Kipngenoh A. Rotich](https://github.com/Noelle-Wavinya-Maingi)
+- [Noelle Maingi](https://github.com/Noelle-Wavinya-Maingi)
+
+- [Ian Odhiambo](https://github.com/Ian32-del)
+
+- [Kipngenoh A. Rotich](https://github.com/kipngenohaaron)
+
+- [Wambui Karanja](https://github.com/karanja03)
+
+- [Wilfred Wainaina](https://github.com/wilmwainaina)
+
+- [Kelvin Moti](https://github.com/motikev)
 
 ### License
 This project is licensed under the MIT [License](LICENCE).
