@@ -1,10 +1,4 @@
-# Kibera-Tours-Backend
-
 # KIBERA-8-SLUM-SAFARIS
-
-
-# Author : Noelle Maingi , Ian Odhiambo , Kipngenoh A. Rotich 
-
 
 # Project Description 
 
@@ -78,6 +72,8 @@ If you'd like to contribute to this project, please follow these steps:
 3. Make your changes and test thoroughly.
 4. Create a pull request explaining the changes you've made.
 
+# Authors : 
+Noelle Maingi[https://github.com/Noelle-Wavinya-Maingi] , Ian Odhiambo[https://github.com/Noelle-Wavinya-Maingi] , Kipngenoh A. Rotich[https://github.com/Noelle-Wavinya-Maingi] 
 
 # License
 This project is licensed under the MIT License.
