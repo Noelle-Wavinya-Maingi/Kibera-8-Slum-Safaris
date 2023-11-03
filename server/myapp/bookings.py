@@ -7,7 +7,7 @@ from myapp import api, db  # Replace this with your Flask app object
 
 # Define Data Transfer Object for booking information
 booking_info = api.model("BookingInfo", {
-    "tour_id": fields.Integer(required=True, description="ID of the tour to book"),
+    "tour_name": fields.String(required=True, description="ID of the tour to book"),
     "tour_date": fields.Date(required=True, description="Date of the tour in YYYY-MM-DD format")
 })
 
@@ -20,7 +20,7 @@ class BookTour(Resource):
         data = request.get_json()
 
         user_id = current_user_id
-        tour_name = data.get("name")
+        tour_name = data.get("tour_name")
         tour_date = data.get("tour_date")  
 
         if not tour_name:
