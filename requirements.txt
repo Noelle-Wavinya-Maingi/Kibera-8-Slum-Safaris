@@ -29,7 +29,7 @@ packaging==23.2
 pluggy==1.2.0
 psycopg2-binary==2.9.9
 PyJWT==2.8.0
-pyrsistent==0.20.0
+pyrsistent==0.19.3
 pytest==7.4.3
 pytest-flask-sqlalchemy==1.1.0
 pytest-mock==3.12.0
