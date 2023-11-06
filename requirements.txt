@@ -38,4 +38,4 @@ pytz==2023.3.post1
 referencing==0.8.9
 SQLAlchemy==2.0.22
 typing_extensions
-Werkzeug==2.3.7
+Werkzeug
