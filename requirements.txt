@@ -12,7 +12,7 @@ Flask-Mail==0.9.1
 flask-marshmallow==0.15.0
 Flask-Migrate==4.0.5
 flask-restx==1.2.0
-Flask-SQLAlchemy==3.1.1
+Flask-SQLAlchemy==3.0.5
 greenlet==3.0.1
 gunicorn==21.2.0
 importlib-resources==6.1.0
