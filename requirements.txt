@@ -33,7 +33,7 @@ pyrsistent==0.19.3
 pytest==7.4.3
 pytest-flask-sqlalchemy==1.1.0
 pytest-mock==3.11.1
-python-dotenv==1.0.0
+python-dotenv==0.21.1
 pytz==2023.3.post1
 referencing==0.30.2
 rpds-py==0.10.6
