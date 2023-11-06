@@ -35,7 +35,7 @@ pytest-flask-sqlalchemy==1.1.0
 pytest-mock==3.11.1
 python-dotenv==0.21.1
 pytz==2023.3.post1
-referencing==0.30.2
+referencing==0.8.9
 rpds-py==0.10.6
 SQLAlchemy==2.0.22
 typing_extensions==4.8.0
