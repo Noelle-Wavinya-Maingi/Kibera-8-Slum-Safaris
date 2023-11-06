@@ -15,7 +15,8 @@ api = Api(app, version="1.0", title="Kibera 8 Slum Safaris API")
 ma = Marshmallow(app)
 app.config["SECRET_KEY"] = '33f334a749dd2e8216f245b0bb263aea'
 app.config['JWT_SECRET_KEY'] = 'b99ce1e67619ed6f9dd29211ec08e559'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URI")
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URI")
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
