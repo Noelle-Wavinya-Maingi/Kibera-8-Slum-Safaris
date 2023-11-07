@@ -170,7 +170,6 @@ class Donation(db.Model):
     recurrence_interval = Column(String(20))
     next_recurrence_date = Column(Date)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
 
     # Relationships with other tables
     donor = relationship("User", back_populates="donations")
@@ -239,7 +238,6 @@ class Beneficiary(db.Model):
         secondary="beneficiaries_organizations",
         back_populates="beneficiaries",
     )
-    
 
     # Constructor to initialize a new beneficiary
     def __init__(self, name, age=None, gender=None, address=None):
@@ -268,14 +266,13 @@ class Story(db.Model):
     id = Column(Integer, primary_key=True)
     title = Column(String(100), nullable=False)
     content = Column(Text, nullable=False)
-    created_at = Column(DateTime,default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
     image = Column(String(255), nullable=False)
 
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
 
     # Relationship with the Organization table
     organization = relationship("Organization", back_populates="stories")
-
 
     # Constructor to initialize a new story
     def __init__(self, title, content, organization_id, image):
@@ -286,11 +283,9 @@ class Story(db.Model):
 
     # String representation of the Story object
     def __repr__(self):
-        return (
-            f"Story(id={self.id}, title={self.title})"
-        )
-    
-    
+        return f"Story(id={self.id}, title={self.title})"
+
+
 # Define the Inventory model
 class Inventory(db.Model):
     __tablename__ = "inventories"
@@ -329,7 +324,7 @@ class Tours(db.Model):
     name = Column(String(255), nullable=False)
     image = Column(String(255), nullable=False)
     price = Column(Float, nullable=False)
-    
+
     user = relationship(
         "User",
         secondary="user_tours",
@@ -346,10 +341,11 @@ class Tours(db.Model):
     def __repr__(self):
         return f"Tours(id={self.id}, name={self.name}, price={self.price})"
 
+
 # Define the association table for users and tours
 user_tours = db.Table(
     "user_tours",
     Column("user_id", Integer, ForeignKey("users.id")),
     Column("tours_id", Integer, ForeignKey("tours.id")),
-    Column("tour_date", DateTime, nullable = False)
+    Column("tour_date", DateTime, nullable=False),
 )

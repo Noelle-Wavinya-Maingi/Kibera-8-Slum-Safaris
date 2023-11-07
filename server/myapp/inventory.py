@@ -1,9 +1,9 @@
-from flask import request, jsonify, make_response 
+from flask import request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from myapp import db, jwt
-from myapp.schema import inventory_schema , inventories_schema
+from myapp.schema import inventory_schema, inventories_schema
 from flask_restx import Namespace, Resource, fields
-from myapp.models import  Inventory # Import your Story model
+from myapp.models import Inventory  # Import your Story model
 from . import api
 
 
@@ -16,6 +16,7 @@ inventory_model = api.model(
         "user_id": fields.Integer,
     },
 )
+
 
 @api.route("/inventory")
 class InventoryResource(Resource):
@@ -33,15 +34,17 @@ class InventoryResource(Resource):
             return jsonify(res)
         except Exception as e:
             error_message = "An error occurred"
-            return make_response(jsonify({"message": error_message}), 500)        
-        
+            return make_response(jsonify({"message": error_message}), 500)
+
     @api.expect(inventory_model, validate=True)
     @jwt_required()
     def post(self):
         current_user_id = get_jwt_identity()
         try:
-            new_inventory_item = api.payload  # Get the data for the new inventory item from the request
-            new_inventory_item['user_id'] = current_user_id
+            new_inventory_item = (
+                api.payload
+            )  # Get the data for the new inventory item from the request
+            new_inventory_item["user_id"] = current_user_id
             inventory_item = Inventory(**new_inventory_item)
             db.session.add(inventory_item)
             db.session.commit()
@@ -50,7 +53,6 @@ class InventoryResource(Resource):
             error_message = "An error occurred while creating the inventory item"
             return {"message": error_message}, 500
 
-        
 
 @api.route("/inventory/<int:inventory_id>")
 class InventoryItemResource(Resource):
@@ -67,7 +69,7 @@ class InventoryItemResource(Resource):
         except Exception as e:
             print("Error:", e)
             return {"message": "An error occurred"}, 500
-    
+
     @jwt_required()
     def delete(self, inventory_id):
         try:
@@ -82,8 +84,10 @@ class InventoryItemResource(Resource):
         except Exception as e:
             print("Error:", e)
             db.session.rollback()
-            return {"message": "An error occurred while deleting the inventory item"}, 500
-    
+            return {
+                "message": "An error occurred while deleting the inventory item"
+            }, 500
+
     @jwt_required()
     def patch(self, inventory_id):
         current_user_id = get_jwt_identity()
@@ -92,7 +96,9 @@ class InventoryItemResource(Resource):
             if not inventory_item:
                 return {"message": "Inventory item not found"}, 404
 
-            updated_data = api.payload  # Get the data for updating the inventory item from the request
+            updated_data = (
+                api.payload
+            )  # Get the data for updating the inventory item from the request
 
             # Update the inventory item's fields with the new data
             for key, value in updated_data.items():
@@ -103,4 +109,6 @@ class InventoryItemResource(Resource):
         except Exception as e:
             print("Error:", e)
             db.session.rollback()
-            return {"message": "An error occurred while updating the inventory item"}, 500
+            return {
+                "message": "An error occurred while updating the inventory item"
+            }, 500

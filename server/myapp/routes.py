@@ -1,26 +1,36 @@
-from flask import  request
+from flask import request
 from flask_restx import Resource, fields
 from . import app, db, mail, api, bcrypt
 from myapp.models import User, Organization
-from myapp.schema import user_schema, users_schema, organization_schema, organizations_schema
+from myapp.schema import (
+    user_schema,
+    users_schema,
+    organization_schema,
+    organizations_schema,
+)
 from flask_mail import Message
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, create_refresh_token
-
+from flask_jwt_extended import create_access_token
 
 
 # Define Data Transfer Object for organization request
-user_login = api.model("UserLogin", {
+user_login = api.model(
+    "UserLogin",
+    {
         "email": fields.String(required=True),
         "password": fields.String(required=True),
-    })
+    },
+)
 
-# DEfine DTO for user registration
-user_registration = api.model("UserRegistration", {
+# Define DTO for user registration
+user_registration = api.model(
+    "UserRegistration",
+    {
         "email": fields.String(required=True),
         "password": fields.String(required=True),
         "username": fields.String(required=True),
         "role": fields.String(required=True),
-    })
+    },
+)
 
 # Define Data Transfer Object for organization request
 organization_request = api.model(
@@ -35,24 +45,31 @@ organization_request = api.model(
 )
 
 # Define DTO for organization login
-organization_login = api.model("OrganizationLogin", {
-    "email": fields.String(required=True),
-    "password": fields.String(required=True),
-})
+organization_login = api.model(
+    "OrganizationLogin",
+    {
+        "email": fields.String(required=True),
+        "password": fields.String(required=True),
+    },
+)
 
-password_reset = api.model('PasswordReset', {
-        "password": fields.String(required=True)
-    })
+password_reset = api.model("PasswordReset", {"password": fields.String(required=True)})
+
 
 @api.route("/user/register")
 class UserRegistration(Resource):
-    @api.expect(user_registration,  validate = True)
+    @api.expect(user_registration, validate=True)
     def post(self):
         """Submit user registration details"""
         data = request.get_json()
         user = user_schema.load(data)
 
-        if not user.get("username") or not user.get("email") or not user.get("password") or not user.get("role"):
+        if (
+            not user.get("username")
+            or not user.get("email")
+            or not user.get("password")
+            or not user.get("role")
+        ):
             return {"message": "All fields are required"}, 400
 
         existing_email = User.query.filter_by(email=user.get("email")).first()
@@ -61,13 +78,14 @@ class UserRegistration(Resource):
             return {"message": "Email already registered"}, 409
         if existing_username:
             return {"message": "Username already registered"}, 409
-        
+
         new_user = User(**user)
 
         db.session.add(new_user)
         db.session.commit()
 
-        return {"message": "User registered successfully!"}, 201
+        return {"message": "User registered successfully!", "role": user.role}, 201
+
 
 @api.route("/user/login")
 class UserLogin(Resource):
@@ -75,19 +93,21 @@ class UserLogin(Resource):
     def post(self):
         """User login"""
         data = request.get_json()
-        user = User.query.filter_by(email=data['email']).first()
+        user = User.query.filter_by(email=data["email"]).first()
 
-        if user and bcrypt.check_password_hash(user.password, data['password']):
+        if user and bcrypt.check_password_hash(user.password, data["password"]):
+            role = user.role
             access_token = create_access_token(identity=user.id)
             return {
                 "access_token": access_token,
                 "user_id": user.id,
                 "username": user.username,
                 "email": user.email,
-                "role": user.role
+                "role": role,
             }, 200
         else:
             return {"message": "Invalid credentials"}, 401
+
 
 # Define the OrganizationRequest resource
 @api.route("/organization_requests")
@@ -95,12 +115,12 @@ class OrganizationRequestResource(Resource):
     @api.marshal_with(organization_request)
     def get(self):
         """Get a list of organization requests."""
-    
+
         requests = Organization.query.filter_by(status=False).all()
-    
+
         if not requests:
             api.abort(404, "No pending organization requests found!")
-       
+
         return requests
 
     @api.expect(organization_request, validate=True)
@@ -163,15 +183,17 @@ class OrganizationRequestDetailResource(Resource):
             organization.reject_request(reason)
 
         return {"message": f"Organization request {id} has been {status}"}
+
+
 @api.route("/organization/login")
 class OrganizationLogin(Resource):
     @api.expect(organization_login, validate=True)
     def post(self):
         """Organization login"""
         data = request.get_json()
-        organization = Organization.query.filter_by(email=data['email']).first()
+        organization = Organization.query.filter_by(email=data["email"]).first()
         if organization:
-            if bcrypt.check_password_hash(organization.password, data['password']):
+            if bcrypt.check_password_hash(organization.password, data["password"]):
                 if organization.status:
                     access_token = create_access_token(identity=organization.id)
                     return {
@@ -182,7 +204,9 @@ class OrganizationLogin(Resource):
                         "status": organization.status,
                     }, 200
                 else:
-                    return {"message": "Organization is pending approval. Please wait for approval."}, 403
+                    return {
+                        "message": "Organization is pending approval. Please wait for approval."
+                    }, 403
             else:
                 return {"message": "Invalid credentials"}, 401
         else:
