@@ -30,8 +30,8 @@ app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(minutes=15)
 app.json.compact = False
 
 stripe_keys = {
-    "secret_key": os.environ["STRIPE_SECRET_KEY"],
-    "publishable_key": os.environ["STRIPE_PUBLISHABLE_KEY"],
+    "secret_key": os.getenv("STRIPE_SECRET_KEY"),
+    "publishable_key": os.getenv("STRIPE_PUBLISHABLE_KEY"),
 }
 
 stripe.api_key = stripe_keys["secret_key"]
