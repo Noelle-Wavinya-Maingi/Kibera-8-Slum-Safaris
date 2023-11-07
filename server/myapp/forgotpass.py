@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_restx import Resource, fields
 from flask_mail import Message
-from . import bcrypt, mail, api, app, db
+from . import bcrypt, mail, api, app, db, user_ns
 import secrets
 from datetime import datetime, timedelta
 from myapp.models import User
@@ -9,7 +9,7 @@ from myapp.models import User
 reset_tokens = {}
 
 # Define DTO for the "Forgot Password" request
-forgot_password_request = api.model(
+forgot_password_request = user_ns.model(
     "ForgotPasswordRequest",
     {
         "email": fields.String(required=True),
@@ -17,7 +17,7 @@ forgot_password_request = api.model(
 )
 
 # Define DTO for the password reset request
-password_reset = api.model(
+password_reset = user_ns.model(
     "PasswordReset",
     {
         "password": fields.String(required=True),
@@ -43,10 +43,11 @@ def send_reset_email(email, reset_url):
 
 
 # Create a new resource for initiating the "Forgot Password" process
-@api.route("/user/forgot_password_request")
+@user_ns.route("/forgot_password_request")
 class ForgotPasswordRequest(Resource):
     @api.expect(forgot_password_request, validate=True)
     def post(self):
+        """Request for a password reset"""
         data = request.get_json()
         email = data.get("email")
 
@@ -56,6 +57,7 @@ class ForgotPasswordRequest(Resource):
 
         reset_token = generate_reset_token()
         reset_tokens[reset_token] = user.id
+        
 
         reset_url = f"http://127.0.0.1:8000/user/reset_password/{reset_token}"
 
@@ -65,10 +67,11 @@ class ForgotPasswordRequest(Resource):
 
 
 # Create a new resource for resetting the user's password
-@api.route("/user/reset_password/<string:reset_token>")
+@user_ns.route("/reset_password/<string:reset_token>")
 class ResetPassword(Resource):
     @api.expect(password_reset, validate=True)
     def put(self, reset_token):
+        """Change the passoword after receiving the reset token"""
         data = request.get_json()
         new_password = data.get("password")
 
@@ -83,6 +86,6 @@ class ResetPassword(Resource):
         user.password = bcrypt.generate_password_hash(new_password).decode("utf-8")
         db.session.commit()
 
-        del reset_tokens[reset_token]  # Remove the used reset token
+        del reset_tokens[reset_token] 
 
         return {"message": "Password reset successful"}, 200

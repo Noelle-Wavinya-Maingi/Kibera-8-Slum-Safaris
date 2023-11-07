@@ -3,9 +3,9 @@ from flask_jwt_extended import jwt_required
 from myapp.schema import story_schema, stories_schema, tour_schema, tours_schema
 from flask_restx import Resource, fields
 from myapp.models import Story, Tours, Organization
-from . import api
+from . import api, story_ns, tour_ns
 
-story_model = api.model(
+story_model = story_ns.model(
     "Story",
     {
         "id": fields.Integer(readonly=True),
@@ -17,7 +17,7 @@ story_model = api.model(
     },
 )
 
-tour_model = api.model(
+tour_model = tour_ns.model(
     "Tour",
     {
         "id": fields.Integer(readonly=True),
@@ -28,11 +28,12 @@ tour_model = api.model(
 )
 
 
-@api.route("/stories")
+@story_ns.route("/")
 class StoriesResource(Resource):
-    @api.expect(story_model, validate=True)
+    @story_ns.expect(story_model, validate=True)
     @jwt_required()
     def get(self):
+        """Get a list of stories"""
         try:
             stories = Story.query.all()
             stories_list = stories_schema.dump(stories)
@@ -43,9 +44,10 @@ class StoriesResource(Resource):
             print("Error:", e)
             return {"message": "An error occurred"}, 500
 
-    @api.expect(story_model, validate=True)
+    @story_ns.expect(story_model, validate=True)
     @jwt_required()
     def post(self):
+        """Post a new story"""
         try:
             new_story = api.payload
 
@@ -70,10 +72,11 @@ class StoriesResource(Resource):
             return {"message": "An error occurred while creating the story"}, 500
 
 
-@api.route("/stories/<int:story_id>")
+@story_ns.route("/<int:story_id>")
 class StoryResource(Resource):
     @jwt_required()
     def get(self, story_id):
+        """Get a story by ID"""
         try:
             story = Story.query.get(story_id)
             if story:
@@ -87,6 +90,7 @@ class StoryResource(Resource):
 
     @jwt_required()
     def delete(self, story_id):
+        """Delete a story"""
         try:
             story = Story.query.get(story_id)
             if story:
@@ -101,11 +105,12 @@ class StoryResource(Resource):
             return {"message": "An error occurred while deleting the story"}, 500
 
 
-@api.route("/tours")
+@tour_ns.route("/")
 class ToursResource(Resource):
-    @api.expect(tour_model, validate=True)
+    @tour_ns.expect(tour_model, validate=True)
     @jwt_required()
     def get(self):
+        """Get a list of tours"""
         try:
             tours = Tours.query.all()
             tours_list = tours_schema.dump(tours)
@@ -116,9 +121,10 @@ class ToursResource(Resource):
             print("Error:", e)
             return {"message": "An error occurred"}, 500
 
-    @api.expect(tour_model, validate=True)
+    @tour_ns.expect(tour_model, validate=True)
     @jwt_required()
     def post(self):
+        """Post a new tour"""
         try:
             new_tour = api.payload
             tour = Tours(**new_tour)
@@ -131,25 +137,27 @@ class ToursResource(Resource):
             return {"message": "An error occurred while creating the tour"}, 500
 
 
-@api.route("/tours/<int:tour_id>")
+@tour_ns.route("/<int:tour_id>")
 class TourResource(Resource):
     @jwt_required()
     def get(self, tour_id):
+        """Get a tour by ID"""
         try:
             tour = Tours.query.get(tour_id)
             if tour:
                 tour_data = tour_schema.dump(
                     tour
-                )  # Use tour_schema instead of tours_schema
+                )  
                 return tour_data, 200
             else:
                 return {"message": "Tour not found"}, 404
         except Exception as e:
             print("Error:", e)
             return {"message": "An error occurred"}, 500
-
+        
     @jwt_required()
     def delete(self, tour_id):
+        """Delete a tour"""
         try:
             tour = Tours.query.get(tour_id)
             if tour:
@@ -162,13 +170,11 @@ class TourResource(Resource):
             print("Error:", e)
             db.session.rollback()
             return {"message": "An error occurred while deleting the tour"}, 500
-
-
-@api.route("/tours/<int:tour_id>")
-class TourResource(Resource):
-    @api.expect(tour_model, validate=True)
+    
+    @tour_ns.expect(tour_model, validate=True)
     @jwt_required()
     def patch(self, tour_id):
+        """Update a tour"""
         try:
             tour = Tours.query.get(tour_id)
             if not tour:

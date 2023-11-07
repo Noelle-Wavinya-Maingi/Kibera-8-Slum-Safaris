@@ -1,6 +1,6 @@
 from flask import request
 from flask_restx import Resource, fields
-from . import app, db, mail, api, bcrypt
+from . import app, db, mail, api, bcrypt, user_ns, organization_ns
 from myapp.models import User, Organization
 from myapp.schema import (
     user_schema,
@@ -13,7 +13,7 @@ from flask_jwt_extended import create_access_token
 
 
 # Define Data Transfer Object for organization request
-user_login = api.model(
+user_login = user_ns.model(
     "UserLogin",
     {
         "email": fields.String(required=True),
@@ -22,7 +22,7 @@ user_login = api.model(
 )
 
 # Define DTO for user registration
-user_registration = api.model(
+user_registration = user_ns.model(
     "UserRegistration",
     {
         "email": fields.String(required=True),
@@ -33,7 +33,7 @@ user_registration = api.model(
 )
 
 # Define Data Transfer Object for organization request
-organization_request = api.model(
+organization_request = organization_ns.model(
     "OrganizationRequest",
     {
         "id": fields.Integer,
@@ -45,7 +45,7 @@ organization_request = api.model(
 )
 
 # Define DTO for organization login
-organization_login = api.model(
+organization_login = organization_ns.model(
     "OrganizationLogin",
     {
         "email": fields.String(required=True),
@@ -53,12 +53,12 @@ organization_login = api.model(
     },
 )
 
-password_reset = api.model("PasswordReset", {"password": fields.String(required=True)})
+password_reset = user_ns.model("PasswordReset", {"password": fields.String(required=True)})
 
 
-@api.route("/user/register")
+@user_ns.route("/register")
 class UserRegistration(Resource):
-    @api.expect(user_registration, validate=True)
+    @user_ns.expect(user_registration, validate=True)
     def post(self):
         """Submit user registration details"""
         data = request.get_json()
@@ -87,9 +87,9 @@ class UserRegistration(Resource):
         return {"message": "User registered successfully!", "role": user.role}, 201
 
 
-@api.route("/user/login")
+@user_ns.route("/login")
 class UserLogin(Resource):
-    @api.expect(user_login, validate=True)
+    @user_ns.expect(user_login, validate=True)
     def post(self):
         """User login"""
         data = request.get_json()
@@ -110,21 +110,22 @@ class UserLogin(Resource):
 
 
 # Define the OrganizationRequest resource
-@api.route("/organization_requests")
+@organization_ns.route("/requests")
 class OrganizationRequestResource(Resource):
-    @api.marshal_with(organization_request)
+    @organization_ns.marshal_with(organization_request)
     def get(self):
         """Get a list of organization requests."""
 
         requests = Organization.query.filter_by(status=False).all()
+
 
         if not requests:
             api.abort(404, "No pending organization requests found!")
 
         return requests
 
-    @api.expect(organization_request, validate=True)
-    @api.marshal_with(organization_request)
+    @organization_ns.expect(organization_request, validate=True)
+    @organization_ns.marshal_with(organization_request)
     def post(self):
         """Submit an organization request."""
         data = request.get_json()
@@ -148,9 +149,9 @@ class OrganizationRequestResource(Resource):
         return organization, 201
 
 
-@api.route("/organization_requests/<int:id>")
+@organization_ns.route("/requests/<int:id>")
 class OrganizationRequestDetailResource(Resource):
-    @api.marshal_with(organization_request)
+    @organization_ns.marshal_with(organization_request)
     def get(self, id):
         """Get details of an organization request by ID."""
         organization = Organization.query.get(id)
@@ -185,9 +186,9 @@ class OrganizationRequestDetailResource(Resource):
         return {"message": f"Organization request {id} has been {status}"}
 
 
-@api.route("/organization/login")
+@organization_ns.route("/login")
 class OrganizationLogin(Resource):
-    @api.expect(organization_login, validate=True)
+    @organization_ns.expect(organization_login, validate=True)
     def post(self):
         """Organization login"""
         data = request.get_json()

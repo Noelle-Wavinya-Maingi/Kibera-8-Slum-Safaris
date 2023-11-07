@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from flask import Flask
-from flask_restx import Api
+from flask_restx import Api, Namespace
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
 from flask_marshmallow import Marshmallow
@@ -41,3 +41,24 @@ migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
 jwt = JWTManager(app)
+
+# Create namespaces for different resource types
+beneficiary_ns = Namespace("Beneficiaries", description="Beneficiary related operations")
+booking_ns = Namespace("Bookings", description="Tour booking related operations")
+donation_ns = Namespace("Donations", description="Donation related operations")
+inventory_ns = Namespace("Inventory", description="Inventory related operations")
+organization_ns = Namespace("Organization", description="Organization related operations")
+story_ns = Namespace("Story", description="Story related operations")
+tour_ns = Namespace("Tour", description="Tour related operations")
+user_ns = Namespace("User", description="User related operations")
+
+# Add namespaces to the API instance
+api.add_namespace(beneficiary_ns)
+api.add_namespace(donation_ns)
+api.add_namespace(booking_ns)
+api.add_namespace(user_ns)
+api.add_namespace(inventory_ns)
+api.add_namespace(organization_ns)
+api.add_namespace(story_ns)
+api.add_namespace(tour_ns)
+

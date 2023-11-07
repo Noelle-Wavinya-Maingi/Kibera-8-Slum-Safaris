@@ -1,12 +1,12 @@
 from flask import request
 from flask_restx import Resource, fields
-from . import db, api, bcrypt, mail, stripe
+from . import db, api, bcrypt, mail, stripe, beneficiary_ns, donation_ns, organization_ns
 from myapp.models import Beneficiary, Donation, Organization
 from flask_mail import Message
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 # Define Data Transfer Object for beneficiary request
-beneficiary_request = api.model(
+beneficiary_request = beneficiary_ns.model(
     "BeneficiaryRequest",
     {
         "name": fields.String(required=True),
@@ -17,7 +17,7 @@ beneficiary_request = api.model(
 )
 
 # Define Data Transfer Object for donation request
-donation_request = api.model(
+donation_request = donation_ns.model(
     "DonationRequest",
     {
         "amount": fields.Float(required=True),
@@ -28,7 +28,7 @@ donation_request = api.model(
     },
 )
 
-donation_response = api.model(
+donation_response = donation_ns.model(
     "DonationResponse",
     {
         "amount": fields.Float(required=True),
@@ -40,7 +40,7 @@ donation_response = api.model(
 )
 
 # Define Data Transfer Object for organization request
-organization_request = api.model(
+organization_request = organization_ns.model(
     "OrganizationRequest",
     {
         "id": fields.Integer,
@@ -60,17 +60,17 @@ admin_action = api.model(
     },
 )
 
-@api.route("/beneficiaries")
+@beneficiary_ns.route("/")
 class BeneficiaryResource(Resource):
-    @api.marshal_with(beneficiary_request)
+    @beneficiary_ns.marshal_with(beneficiary_request)
     @jwt_required()
     def get(self):
         """Get a list of beneficiaries."""
         beneficiaries = Beneficiary.query.all()
         return beneficiaries
 
-    @api.expect(beneficiary_request, validate=True)
-    @api.marshal_with(beneficiary_request)
+    @beneficiary_ns.expect(beneficiary_request, validate=True)
+    @beneficiary_ns.marshal_with(beneficiary_request)
     @jwt_required()
     def post(self):
         """Submit a new beneficiary request."""
@@ -83,9 +83,9 @@ class BeneficiaryResource(Resource):
 
         return beneficiary, 201
 
-@api.route("/beneficiaries/<int:id>")
+@beneficiary_ns.route("/<int:id>")
 class BeneficiaryDetailResource(Resource):
-    @api.marshal_with(beneficiary_request)
+    @beneficiary_ns.marshal_with(beneficiary_request)
     @jwt_required()
     def get(self, id):
         """Get details of a beneficiary by ID."""
@@ -94,10 +94,11 @@ class BeneficiaryDetailResource(Resource):
             api.abort(404, "Beneficiary not found")
         return beneficiary
     
-@api.route("/create-payment-intent", methods=["POST"])
+@donation_ns.route("/create-payment-intent", methods=["POST"])
 class CreatePaymentIntentResource(Resource):
     @jwt_required()
     def post(self):
+        """Post payment intent to Stripe"""
         data = request.get_json()
         amount = data['amount'] 
         currency = "usd"  
@@ -116,19 +117,20 @@ class CreatePaymentIntentResource(Resource):
             return {"error": str(e)}, 400
 
 
-@api.route("/donations")
+@donation_ns.route("/")
 class DonationResource(Resource):
-    @api.marshal_with(donation_response)
+    @donation_ns.marshal_with(donation_response)
     @jwt_required()
     def get(self):
         """Get a list of donations."""
         donations = Donation.query.all()
         return donations
 
-    @api.expect(donation_request, validate=True)
-    @api.marshal_with(donation_response)
+    @donation_ns.expect(donation_request, validate=True)
+    @donation_ns.marshal_with(donation_response)
     @jwt_required()
     def post(self):
+        """Post a donation to an organization"""
         data = request.get_json()
 
         # Get the donor_id from the JWT token
@@ -165,9 +167,9 @@ class DonationResource(Resource):
             return {"error": str(e)}, 400
 
 
-@api.route("/donations/<int:id>")
+@donation_ns.route("/<int:id>")
 class DonationDetailResource(Resource):
-    @api.marshal_with(donation_response)
+    @donation_ns.marshal_with(donation_response)
     @jwt_required()
     def get(self, id):
         """Get details of a donation by ID."""
