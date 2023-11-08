@@ -4,10 +4,10 @@ from flask_restx import Resource, fields
 from flask_mail import Message
 
 from myapp.models import user_tours, Tours, User
-from myapp import api, db, mail
+from myapp import api, db, mail, booking_ns
 
 # Define Data Transfer Object for booking information
-booking_info = api.model(
+booking_info = booking_ns.model(
     "BookingInfo",
     {
         "tour_name": fields.String(required=True, description="ID of the tour to book"),
@@ -18,11 +18,12 @@ booking_info = api.model(
 )
 
 
-@api.route("/book_tour")
+@booking_ns.route("/")
 class BookTour(Resource):
     @api.expect(booking_info, validate=True)
     @jwt_required()
     def post(self):
+        """Post a booking for a tour"""
         current_user_id = get_jwt_identity()
         data = request.get_json()
 

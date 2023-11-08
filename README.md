@@ -5,6 +5,7 @@
 [![Flask-RESTx](https://img.shields.io/badge/Flask--RESTx-0.5.1-blue.svg)](https://pypi.org/project/flask-restx/)
 [![JWT](https://img.shields.io/badge/JWT-2.0.1-blue.svg)](https://pypi.org/project/PyJWT/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13.5-blue.svg)](https://www.postgresql.org/)
+![Stripe](https://img.shields.io/badge/Stripe-Payment%20Integration-blue.svg)
 
 
 ## Table of Content

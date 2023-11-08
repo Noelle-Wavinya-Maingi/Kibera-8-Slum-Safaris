@@ -1,13 +1,12 @@
 from flask import request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from myapp import db, jwt
+from myapp import db, jwt, api, inventory_ns
 from myapp.schema import inventory_schema, inventories_schema
-from flask_restx import Namespace, Resource, fields
-from myapp.models import Inventory  # Import your Story model
-from . import api
+from flask_restx import  Resource, fields
+from myapp.models import Inventory
 
 
-inventory_model = api.model(
+inventory_model = inventory_ns.model(
     "Inventory",
     {
         "id": fields.Integer(readonly=True),
@@ -17,12 +16,12 @@ inventory_model = api.model(
     },
 )
 
-
-@api.route("/inventory")
+@inventory_ns.route("")
 class InventoryResource(Resource):
-    @api.expect(inventory_model, validate=True)
+    @inventory_ns.expect(inventory_model, validate=True)
     @jwt_required()
     def get(self):
+        """Get the list of invetories"""
         try:
             current_user_id = get_jwt_identity()
             if current_user_id is None:
@@ -36,9 +35,10 @@ class InventoryResource(Resource):
             error_message = "An error occurred"
             return make_response(jsonify({"message": error_message}), 500)
 
-    @api.expect(inventory_model, validate=True)
+    @inventory_ns.expect(inventory_model, validate=True)
     @jwt_required()
     def post(self):
+        """Post an inventory"""
         current_user_id = get_jwt_identity()
         try:
             new_inventory_item = (
@@ -53,11 +53,11 @@ class InventoryResource(Resource):
             error_message = "An error occurred while creating the inventory item"
             return {"message": error_message}, 500
 
-
-@api.route("/inventory/<int:inventory_id>")
+@inventory_ns.route("<int:inventory_id>")
 class InventoryItemResource(Resource):
     @jwt_required()
     def get(self, inventory_id):
+        """Get an invetory by ID"""
         current_user_id = get_jwt_identity()
         try:
             inventory_item = Inventory.query.get(inventory_id)
@@ -72,6 +72,7 @@ class InventoryItemResource(Resource):
 
     @jwt_required()
     def delete(self, inventory_id):
+        """Delete an inventory"""
         try:
             current_user_id = get_jwt_identity()
             inventory_item = Inventory.query.get(inventory_id)
@@ -90,6 +91,7 @@ class InventoryItemResource(Resource):
 
     @jwt_required()
     def patch(self, inventory_id):
+        """Update an inventory"""
         current_user_id = get_jwt_identity()
         try:
             inventory_item = Inventory.query.get(inventory_id)
