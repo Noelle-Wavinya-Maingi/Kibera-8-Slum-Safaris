@@ -9,16 +9,28 @@ def seed_database():
     with app.app_context():
         # Delete existing data
         
-       
+        db.session.query(user_tours).delete()
+        db.session.query(beneficiaries_organizations).delete()
         db.session.query(Donation).delete()
         db.session.query(Beneficiary).delete()
         db.session.query(Story).delete()
         db.session.query(Inventory).delete()
         db.session.query(Tours).delete()
-        db.session.query(user_tours).delete()
-        db.session.query(beneficiaries_organizations).delete()
         db.session.query(User).delete()
         db.session.query(Organization).delete()
+
+           # Create a superadmin user
+        superadmin = User(
+            username="superadmin",
+            email="superadmin@example.com",
+            password="superadmin_password",  
+            role="superadmin",
+        )
+
+        db.session.add(superadmin)
+        db.session.commit()
+
+        print("Superadmin Seeded!!")
 
         # Create a sample user
         user1 = User(
@@ -122,8 +134,8 @@ def seed_database():
         db.session.execute(beneficiaries_organizations_entry)
         db.session.commit()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     seed_database()
-    print("Database seeded succeeded!!")
+    print("Database seeded successfully!")

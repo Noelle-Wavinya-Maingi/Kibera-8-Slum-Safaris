@@ -62,6 +62,19 @@ class User(db.Model):
     # String representation of the User object
     def __repr__(self):
         return f"User(id={self.id}, username={self.username}, email={self.email}, role={self.role})"
+    
+    @classmethod
+    def create_superadmin(cls, username, email, password):
+        superadmin = cls(
+            username=username,
+            email=email,
+            password=password,
+            role="superadmin",
+        )
+        db.session.add(superadmin)
+        db.session.commit()
+        return superadmin
+    
 
 
 # Define the Organization model
