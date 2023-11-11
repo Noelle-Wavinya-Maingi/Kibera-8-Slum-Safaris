@@ -31,7 +31,6 @@ tour_model = tour_ns.model(
 @story_ns.route("/")
 class StoriesResource(Resource):
     @story_ns.expect(story_model, validate=True)
-    @jwt_required()
     def get(self):
         """Get a list of stories"""
         try:
@@ -74,7 +73,6 @@ class StoriesResource(Resource):
 
 @story_ns.route("/<int:story_id>")
 class StoryResource(Resource):
-    @jwt_required()
     def get(self, story_id):
         """Get a story by ID"""
         try:
@@ -108,7 +106,6 @@ class StoryResource(Resource):
 @tour_ns.route("/")
 class ToursResource(Resource):
     @tour_ns.expect(tour_model, validate=True)
-    @jwt_required()
     def get(self):
         """Get a list of tours"""
         try:
@@ -139,7 +136,6 @@ class ToursResource(Resource):
 
 @tour_ns.route("/<int:tour_id>")
 class TourResource(Resource):
-    @jwt_required()
     def get(self, tour_id):
         """Get a tour by ID"""
         try:
