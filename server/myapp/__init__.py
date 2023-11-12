@@ -19,6 +19,7 @@ from flask_jwt_extended import JWTManager
 from datetime import timedelta
 from flask_marshmallow import Marshmallow
 import stripe
+from flask_cors import CORS
 
 
 app = Flask(__name__)
@@ -50,6 +51,7 @@ migrate = Migrate(app, db)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
 jwt = JWTManager(app)
+cors = CORS(app)
 
 # Create namespaces for different resource types
 beneficiary_ns = Namespace("Beneficiaries", description="Beneficiary related operations")
