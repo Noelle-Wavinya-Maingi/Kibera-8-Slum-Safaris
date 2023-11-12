@@ -1,4 +1,12 @@
 import os
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+import logging
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 
 from flask_sqlalchemy import SQLAlchemy
@@ -11,6 +19,7 @@ from flask_jwt_extended import JWTManager
 from datetime import timedelta
 from flask_marshmallow import Marshmallow
 import stripe
+
 
 app = Flask(__name__)
 api = Api(app, version="1.0", title="Kibera 8 Slum Safaris API")
