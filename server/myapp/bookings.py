@@ -33,7 +33,7 @@ def calculate_booking_amount(tour, number_of_persons):
 
 # Function to send an email confirmation to the user
 def send_booking_confirmation_email(
-    user_email, user_username, tour_name, tour_date, booking_amount
+    user_email, user_username, tour_name, tour_date, booking_amount 
 ):
     msg = Message(
         "Tour Booking Confirmation", sender="noreply@gmail.com", recipients=[user_email]
@@ -42,6 +42,21 @@ def send_booking_confirmation_email(
     msg.body = (
         f"Hello {user_username},\n"
         + f"Thank you for booking the {tour_name} tour for {tour_date}. The total amount is USD{booking_amount}. Enjoy your trip!\n\n"
+        + "Regards,\n"
+        + "Kibera-8 Slum Safaris"
+    )
+    mail.send(msg)
+
+def send_booking_approval_email(
+    user_email, user_username, tour_name, tour_date, booking_amount
+):
+    msg = Message(
+        "Tour Booking Approved", sender="noreply@gmail.com", recipients=[user_email]
+    )
+
+    msg.body = (
+        f"Hello {user_username},\n"
+        + f"Your booking for the {tour_name} tour on {tour_date} has been approved. The total amount is USD{booking_amount}. Enjoy your trip!\n\n"
         + "Regards,\n"
         + "Kibera-8 Slum Safaris"
     )
@@ -107,6 +122,7 @@ class BookTour(Resource):
             # Return the tour information and date as a JSON response
             response_data = {
                 "message": "Tour booked successfully!",
+                "tour_id": tour.id,
                 "tour_name": tour.name,
                 "tour_date": tour_date,
                 "tour_price": tour.price,
@@ -117,3 +133,33 @@ class BookTour(Resource):
             return response_data, 201
         except Exception as e:
             return {"message": "Error while booking the tour", "error": str(e)}, 500
+
+@booking_ns.route("/admin-approval/<int:booking_id>")
+class AdminApprovalResource(Resource):
+    @jwt_required()
+    def put(self, booking_id):
+        current_user_id = get_jwt_identity()
+
+        # Check if the current user is the admin (you may need additional logic for role-based authentication)
+        admin_user = User.query.filter_by(id=current_user_id, is_admin=True).first()
+        if not admin_user:
+            return {"message": "Unauthorized"}, 401
+
+        # Update the booking status to approved
+        booking = user_tours.query.get(booking_id)
+        if not booking:
+            return {"message": "Booking not found"}, 404
+
+        booking.is_approved = True
+        db.session.commit()
+
+        # Send an email to the user informing them of the approval (similar to the booking confirmation email)
+        send_booking_approval_email(
+            booking.user.email,
+            booking.user.username,
+            booking.tour.name,
+            booking.tour_date,
+            booking.total_price,
+        )
+
+        return {"message": f"Booking {booking_id} approved successfully"}, 200

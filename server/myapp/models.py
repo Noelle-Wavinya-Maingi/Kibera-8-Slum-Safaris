@@ -365,7 +365,7 @@ user_tours = db.Table(
     Column("user_id", Integer, ForeignKey("users.id")),
     Column("tours_id", Integer, ForeignKey("tours.id")),
     Column("tour_date", DateTime, nullable=False),
-    Column("status", String, default="pending")
+    Column("status", String, default="pending"),
 )
 
 
