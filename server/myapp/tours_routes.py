@@ -4,6 +4,7 @@ from myapp.schema import story_schema, stories_schema, tour_schema, tours_schema
 from flask_restx import Resource, fields
 from myapp.models import Story, Tours, Organization
 from . import api, story_ns, tour_ns
+import cloudinary.uploader
 
 story_model = story_ns.model(
     "Story",
@@ -59,6 +60,10 @@ class StoriesResource(Resource):
 
             new_story["organization_id"] = organization.id
             new_story.pop("organization_name")
+
+            # Upload image to Cloudinary
+            image_url = cloudinary.uploader.upload(new_story["image"])["url"]
+            new_story["image"] = image_url
 
             story = Story(**new_story)
             db.session.add(story)
@@ -124,10 +129,16 @@ class ToursResource(Resource):
         """Post a new tour"""
         try:
             new_tour = api.payload
+
+            # Upload image to Cloudinary
+            image_url = cloudinary.uploader.upload(new_tour["image"])["url"]
+            new_tour["image"] = image_url
+
             tour = Tours(**new_tour)
             db.session.add(tour)
             db.session.commit()
             return {"message": "Tour created successfully"}, 201
+
         except Exception as e:
             print("Error:", e)
             db.session.rollback()
