@@ -45,6 +45,12 @@ stripe_keys = {
 }
 
 stripe.api_key = stripe_keys["secret_key"]
+# Configure Cloudinary
+cloudinary.config(
+    cloud_name='ddi2x0uf9',
+    api_key='677945454898332',
+    api_secret='GmNEkzXoXwSrY-1MkfSBZ255FD4'
+)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

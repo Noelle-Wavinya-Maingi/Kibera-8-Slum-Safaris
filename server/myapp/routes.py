@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, url_for
 from flask_restx import Resource, fields
 from . import app, db, mail, api, bcrypt, user_ns, organization_ns
 from myapp.models import User, Organization
@@ -10,7 +10,7 @@ from myapp.schema import (
 )
 from flask_mail import Message
 from flask_jwt_extended import create_access_token
-
+import secrets
 
 # Define Data Transfer Object for organization request
 user_login = user_ns.model(
@@ -62,29 +62,69 @@ class UserRegistration(Resource):
     def post(self):
         """Submit user registration details"""
         data = request.get_json()
-        user = user_schema.load(data)
+        loaded_user_data = user_schema.load(data)
 
         if (
-            not user.get("username")
-            or not user.get("email")
-            or not user.get("password")
-            or not user.get("role")
+            not loaded_user_data.get("username")
+            or not loaded_user_data.get("email")
+            or not loaded_user_data.get("password")
+            or not loaded_user_data.get("role")
         ):
             return {"message": "All fields are required"}, 400
 
-        existing_email = User.query.filter_by(email=user.get("email")).first()
-        existing_username = User.query.filter_by(username=user.get("username")).first()
+        existing_email = User.query.filter_by(email=loaded_user_data.get("email")).first()
+        existing_username = User.query.filter_by(username=loaded_user_data.get("username")).first()
         if existing_email:
             return {"message": "Email already registered"}, 409
         if existing_username:
             return {"message": "Username already registered"}, 409
 
-        new_user = User(**user)
+        # Generate a verification token
+        verification_token = generate_verification_token()
+
+        # Create a new instance of the User model
+        new_user = User(
+            username=loaded_user_data["username"],
+            email=loaded_user_data["email"],
+            password=loaded_user_data["password"],
+            role=loaded_user_data["role"],
+            verification_token=verification_token,
+        )
 
         db.session.add(new_user)
         db.session.commit()
 
-        return {"message": "User registered successfully!", "role": user.role}, 201
+        # Send a verification email
+        verification_link = f"http://127.0.0.1:8000/User/verify/{verification_token}"
+        msg = Message(
+            "Verify Your Email",
+            sender="noellemaingi@gmail.com",
+            recipients=[new_user.email],
+        )
+        msg.body = f"Click the following link to verify your email: {verification_link}"
+        mail.send(msg)
+
+        return {"message": "User registered successfully! Check your email for verification."}, 201
+
+def generate_verification_token():
+    """
+    Generate a secure verification token.
+    """
+    return secrets.token_urlsafe(30)
+
+@user_ns.route("/verify/<token>")
+class UserVerification(Resource):
+    def get(self, token):
+        """Verify user email using the provided token."""
+        user = User.query.filter_by(verification_token=token).first()
+
+        if user:
+            # Mark the user as verified
+            user.verification_token = None
+            db.session.commit()
+            return {"message": "Email verified successfully!"}, 200
+        else:
+            return {"message": "Invalid verification token"}, 400
 
 
 @user_ns.route("/login")
@@ -96,18 +136,20 @@ class UserLogin(Resource):
         user = User.query.filter_by(email=data["email"]).first()
 
         if user and bcrypt.check_password_hash(user.password, data["password"]):
-            role = user.role
-            access_token = create_access_token(identity=user.id)
-            return {
-                "access_token": access_token,
-                "user_id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "role": role,
-            }, 200
+            if user.verification_token is None:  
+                role = user.role
+                access_token = create_access_token(identity=user.id)
+                return {
+                    "access_token": access_token,
+                    "user_id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "role": role,
+                }, 200
+            else:
+                return {"message": "Email not verified. Please verify your email first."}, 401
         else:
             return {"message": "Invalid credentials"}, 401
-
 
 # Define the OrganizationRequest resource
 @organization_ns.route("/requests")
@@ -115,9 +157,7 @@ class OrganizationRequestResource(Resource):
     @organization_ns.marshal_with(organization_request)
     def get(self):
         """Get a list of organization requests."""
-
         requests = Organization.query.filter_by(status=False).all()
-
 
         if not requests:
             api.abort(404, "No pending organization requests found!")

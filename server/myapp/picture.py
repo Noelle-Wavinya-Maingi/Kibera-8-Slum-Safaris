@@ -1,21 +1,8 @@
-from flask import Flask, render_template, request, jsonify
-from myapp import os , cloudinary
-
-app = Flask(__name__)
-
-# Configure Cloudinary
-cloudinary.config(
-    cloud_name=os.getenv('ddi2x0uf9'),
-    api_key=os.getenv('677945454898332'),
-    api_secret=os.getenv('GmNEkzXoXwSrY-1MkfSBZ255FD4')
-)
-# Home route
-@app.route('/')
-def hello():
-    return "Hello World!"
+from flask import  request, jsonify
+from myapp import  cloudinary, app
 
 # Upload route
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['POST', 'GET'])
 def upload_file():
     try:
         if request.method == 'POST':

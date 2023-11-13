@@ -24,6 +24,7 @@ class UserSchema(ma.SQLAlchemySchema):
     email = ma.auto_field()
     password = ma.auto_field()
     role = ma.auto_field()
+    verification_token = ma.auto_field()
 
 
 # Create an instance of the UserSchema for single and multiple user objects

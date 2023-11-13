@@ -27,10 +27,13 @@ class User(db.Model):
     email = Column(String(120), unique=True, nullable=False)
     password = Column(String(60), nullable=False)
     role = Column(String(20), nullable=False)
+    verification_token = db.Column(db.String(100), unique=True, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships with other tables
     donations = relationship("Donation", back_populates="donor")
     inventory = relationship("Inventory", back_populates="donors")
+    gallery = relationship('Gallery', back_populates='user')
     tours = relationship(
         "Tours",
         secondary="user_tours",
@@ -38,11 +41,12 @@ class User(db.Model):
     )
 
     # Constructor to initialize a new user
-    def __init__(self, username, email, password, role):
+    def __init__(self, username, email, password, role, verification_token):
         self.username = username
         self.email = email
         self.password = self.generate_password_hash(password)
         self.role = role
+        self.verification_token = verification_token
 
     # Method to generate a password hash
     def generate_password_hash(self, password):
@@ -361,4 +365,15 @@ user_tours = db.Table(
     Column("user_id", Integer, ForeignKey("users.id")),
     Column("tours_id", Integer, ForeignKey("tours.id")),
     Column("tour_date", DateTime, nullable=False),
+    Column("status", String, default="pending")
 )
+
+
+# Gallery model
+class Gallery(db.Model):
+    __tablename__ = 'galleries'
+
+    id = Column(Integer, primary_key=True)
+    image_url = Column(String, nullable=False)
+    user_id = Column(Integer, db.ForeignKey('users.id'), nullable=False)
+    user = relationship('User', back_populates='gallery')
