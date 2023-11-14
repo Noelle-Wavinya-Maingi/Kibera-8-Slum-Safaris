@@ -1,6 +1,7 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request
 from flask_restx import Resource, fields
+from sqlalchemy import update
 from flask_mail import Message
 
 # Import necessary models and libraries
@@ -134,32 +135,42 @@ class BookTour(Resource):
         except Exception as e:
             return {"message": "Error while booking the tour", "error": str(e)}, 500
 
-@booking_ns.route("/admin-approval/<int:booking_id>")
 class AdminApprovalResource(Resource):
     @jwt_required()
     def put(self, booking_id):
         current_user_id = get_jwt_identity()
 
-        # Check if the current user is the admin (you may need additional logic for role-based authentication)
-        admin_user = User.query.filter_by(id=current_user_id, is_admin=True).first()
+        # Check if the current user has the required role (assuming 'Donor' role has admin privileges)
+        admin_user = User.query.filter_by(id=current_user_id, role='Donor').first()
         if not admin_user:
             return {"message": "Unauthorized"}, 401
 
         # Update the booking status to approved
-        booking = user_tours.query.get(booking_id)
-        if not booking:
-            return {"message": "Booking not found"}, 404
-
-        booking.is_approved = True
+        stmt = update(user_tours).where(user_tours.c.id == booking_id).values(status="Approved")
+        db.session.execute(stmt)
         db.session.commit()
 
-        # Send an email to the user informing them of the approval (similar to the booking confirmation email)
+
+
+        # Get the updated booking information by joining with User and Tours tables
+        booking_info = (
+            db.session.query(user_tours, User, Tours)
+            .join(User, user_tours.c.user_id == User.id)
+            .join(Tours, user_tours.c.tours_id == Tours.id)
+            .filter(user_tours.c.id == booking_id)
+            .first()
+        )
+
+        if not booking_info:
+            return {"message": f"Booking {booking_id} not found"}, 404
+
+        # Send an email to the user informing them of the approval
         send_booking_approval_email(
-            booking.user.email,
-            booking.user.username,
-            booking.tour.name,
-            booking.tour_date,
-            booking.total_price,
+            booking_info.User.email,
+            booking_info.User.username,
+            booking_info.Tours.name,
+            booking_info.user_tours.tour_date,
+            "Approved",  # Assuming status is a string
         )
 
         return {"message": f"Booking {booking_id} approved successfully"}, 200

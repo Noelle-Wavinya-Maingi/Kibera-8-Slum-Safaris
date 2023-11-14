@@ -9,9 +9,10 @@ flask-bcrypt = "*"
 flask = "*"
 flask-migrate = "*"
 flask-mail = "*"
-flask-restx = "*"
+flask-restx = "==0.5.1"
 gunicorn = "*"
 psycopg2-binary = "*"
+flask-cors = "*"
 
 [dev-packages]
 
