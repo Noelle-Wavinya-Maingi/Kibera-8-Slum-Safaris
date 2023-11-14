@@ -1,6 +1,7 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request
 from flask_restx import Resource, fields
+from sqlalchemy import update
 from flask_mail import Message
 
 # Import necessary models and libraries
@@ -33,7 +34,7 @@ def calculate_booking_amount(tour, number_of_persons):
 
 # Function to send an email confirmation to the user
 def send_booking_confirmation_email(
-    user_email, user_username, tour_name, tour_date, booking_amount
+    user_email, user_username, tour_name, tour_date, booking_amount 
 ):
     msg = Message(
         "Tour Booking Confirmation", sender="noreply@gmail.com", recipients=[user_email]
@@ -42,6 +43,21 @@ def send_booking_confirmation_email(
     msg.body = (
         f"Hello {user_username},\n"
         + f"Thank you for booking the {tour_name} tour for {tour_date}. The total amount is USD{booking_amount}. Enjoy your trip!\n\n"
+        + "Regards,\n"
+        + "Kibera-8 Slum Safaris"
+    )
+    mail.send(msg)
+
+def send_booking_approval_email(
+    user_email, user_username, tour_name, tour_date, booking_amount
+):
+    msg = Message(
+        "Tour Booking Approved", sender="noreply@gmail.com", recipients=[user_email]
+    )
+
+    msg.body = (
+        f"Hello {user_username},\n"
+        + f"Your booking for the {tour_name} tour on {tour_date} has been approved. The total amount is USD{booking_amount}. Enjoy your trip!\n\n"
         + "Regards,\n"
         + "Kibera-8 Slum Safaris"
     )
@@ -107,6 +123,7 @@ class BookTour(Resource):
             # Return the tour information and date as a JSON response
             response_data = {
                 "message": "Tour booked successfully!",
+                "tour_id": tour.id,
                 "tour_name": tour.name,
                 "tour_date": tour_date,
                 "tour_price": tour.price,
@@ -117,3 +134,43 @@ class BookTour(Resource):
             return response_data, 201
         except Exception as e:
             return {"message": "Error while booking the tour", "error": str(e)}, 500
+
+class AdminApprovalResource(Resource):
+    @jwt_required()
+    def put(self, booking_id):
+        current_user_id = get_jwt_identity()
+
+        # Check if the current user has the required role (assuming 'Donor' role has admin privileges)
+        admin_user = User.query.filter_by(id=current_user_id, role='Donor').first()
+        if not admin_user:
+            return {"message": "Unauthorized"}, 401
+
+        # Update the booking status to approved
+        stmt = update(user_tours).where(user_tours.c.id == booking_id).values(status="Approved")
+        db.session.execute(stmt)
+        db.session.commit()
+
+
+
+        # Get the updated booking information by joining with User and Tours tables
+        booking_info = (
+            db.session.query(user_tours, User, Tours)
+            .join(User, user_tours.c.user_id == User.id)
+            .join(Tours, user_tours.c.tours_id == Tours.id)
+            .filter(user_tours.c.id == booking_id)
+            .first()
+        )
+
+        if not booking_info:
+            return {"message": f"Booking {booking_id} not found"}, 404
+
+        # Send an email to the user informing them of the approval
+        send_booking_approval_email(
+            booking_info.User.email,
+            booking_info.User.username,
+            booking_info.Tours.name,
+            booking_info.user_tours.tour_date,
+            "Approved",  # Assuming status is a string
+        )
+
+        return {"message": f"Booking {booking_id} approved successfully"}, 200
